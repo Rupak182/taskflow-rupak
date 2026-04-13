@@ -8,6 +8,8 @@ engine = AsyncEngine(
     create_engine(
         Config.DATABASE_URL,
         echo=True,
+        pool_pre_ping=True,
+        pool_recycle=3600
     )
 )
 
