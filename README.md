@@ -2,11 +2,11 @@
 
 A full-stack task management system. Users can register, log in, create projects, and manage tasks — including assigning them to other users, filtering by status/assignee, and tracking priorities.
 
----
+
 
 <img width="1918" height="1073" alt="image" src="https://github.com/user-attachments/assets/ec8bcd9c-4713-48bc-b30b-d1c07dbdc280" />
 
----
+
 
 
 ## 1. Overview
