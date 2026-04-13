@@ -64,6 +64,18 @@ export default function Projects() {
       
       {isLoading ? (
         <ProjectsSkeleton />
+      ) : projects?.projects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center py-24 gap-4 border border-dashed border-border rounded-lg">
+          <div className="text-5xl">📂</div>
+          <h2 className="text-xl font-semibold text-foreground">No projects yet</h2>
+          <p className="text-sm text-muted-foreground max-w-xs">You haven't created any projects yet. Start by creating your first one!</p>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded"
+          >
+            + Create your first project
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {projects?.projects.map((project) => (

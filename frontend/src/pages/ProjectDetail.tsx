@@ -202,8 +202,16 @@ export default function ProjectDetail() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="px-2 py-1 bg-background text-xs sm:text-sm rounded capitalize">{task.priority}</span>
-                <span className="px-2 py-1 bg-background text-xs sm:text-sm rounded capitalize">{task.status.replace('_', ' ')}</span>
+                <span className={`px-2 py-1 text-xs sm:text-sm rounded capitalize font-medium ${
+                  task.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                  task.priority === 'medium' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                  'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                }`}>{task.priority}</span>
+                <span className={`px-2 py-1 text-xs sm:text-sm rounded capitalize font-medium ${
+                  task.status === 'done' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-500'
+                }`}>{task.status.replace('_', ' ')}</span>
                 <button
                   onClick={() => openModal(task)}
                   className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded transition hover:bg-secondary/80"

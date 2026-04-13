@@ -17,7 +17,7 @@ export const useCreateTask = (projectId: string) => {
   return useMutation({
     mutationFn: (data: TaskCreate) => createTask(projectId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.list(projectId) });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.tasks.base, 'list', projectId] });
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) });
     },
   });
@@ -60,7 +60,7 @@ export const useUpdateTask = (projectId?: string) => {
       // Always refetch after error or success to ensure we represent absolute truth from backend
       const pid = data?.project_id || context?.projectId;
       if (pid) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.list(pid) });
+        queryClient.invalidateQueries({ queryKey: [...queryKeys.tasks.base, 'list', pid] });
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(pid) });
       }
     },
