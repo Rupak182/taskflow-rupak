@@ -99,7 +99,7 @@ docker compose exec app uv run alembic upgrade head
 # Seed the database with test data (1 user, 1 project, 3 tasks)
 docker compose exec app uv run python seed.py
 # Seed Login Credentials:
-# Email: test@example.com , Password: password
+# Email: test@example.com , Password: password123
 ```
 
 ## Interactive API Documentation
@@ -123,7 +123,7 @@ After running the seed script:
 
 ```
 Email:    test@example.com
-Password: password
+Password: password123
 ```
 
 ---

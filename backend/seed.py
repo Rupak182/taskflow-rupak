@@ -9,7 +9,7 @@ from src.auth.utils import generate_password_hash
 async def seed():
     async with AsyncSession(engine) as session:
         email = "test@example.com"
-        password = "password"
+        password = "password123"
         print(f"Seeding database with user: {email} / {password}...")
 
         user = User(
