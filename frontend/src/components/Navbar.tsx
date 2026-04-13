@@ -1,16 +1,21 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  // Placeholder user
-  const user = { name: "John Doe" };
-  const isAuthenticated = true;
+  const queryClient = useQueryClient();
+  
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAuthenticated = !!token;
 
   const handleLogout = () => {
-    // Placeholder for logout logic (e.g., removing JWT)
-    console.log("Logging out...");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    queryClient.clear();
     navigate("/login");
   };
 

@@ -1,29 +1,36 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useLogin } from '@/api/auth/hooks';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  
+  const loginMutation = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Client-side validation placeholder
     if (!email || !password) {
       setError('Please fill in all fields');
       toast.error('Please fill in all fields');
       return;
     }
 
-    // Placeholder for API call and JWT storage
-    console.log("Logging in with", email);
-    toast.success('Successfully logged in!');
-    // localStorage.setItem('token', 'mock_jwt_token');
-    navigate('/projects');
+    try {
+      await loginMutation.mutateAsync({ email, password });
+      toast.success('Successfully logged in!');
+      navigate('/projects');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Failed to login';
+      setError(errorMsg);
+      toast.error(errorMsg);
+    }
   };
 
   return (
@@ -46,7 +53,13 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button type="submit" className="p-2 bg-primary text-primary-foreground rounded mt-4">Login</button>
+          <button 
+            type="submit" 
+            className="p-2 bg-primary text-primary-foreground rounded mt-4"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? 'Logging in...' : 'Login'}
+          </button>
         </form>
         <p className="mt-4 text-sm text-muted-foreground">
           Don't have an account? <Link to="/register" className="text-primary hover:underline">Register</Link>
