@@ -6,6 +6,7 @@ from .models import TaskStatus, TaskPriority
 class TaskCreate(BaseModel):
     title: str = Field(..., max_length=255)
     description: str | None = None
+    status: TaskStatus = Field(default=TaskStatus.todo)
     priority: TaskPriority = Field(default=TaskPriority.medium)
     assignee_id: uuid.UUID | None = None
     due_date: date | None = None
