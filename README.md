@@ -6,7 +6,7 @@ A full-stack task management system. Users can register, log in, create projects
 
 <img width="1918" height="1073" alt="image" src="https://github.com/user-attachments/assets/ec8bcd9c-4713-48bc-b30b-d1c07dbdc280" />
 
---
+---
 
 
 ## 1. Overview
@@ -38,7 +38,7 @@ A full-stack task management system. Users can register, log in, create projects
 
 ## 2. Architecture Decisions
 
-### Backend (FastAPI over Go)
+### Backend (FastAPI)
 I chose **FastAPI + Python**  for the backend along with sqlalchemy as ORM and alembic for migrations.
 
 ### Schema & Migrations
@@ -52,7 +52,7 @@ I chose **FastAPI + Python**  for the backend along with sqlalchemy as ORM and a
 - JWT secret and CORS origins are read from `.env`
 - CORS `allow_origins` is loaded dynamically from the `Config` object
 
-### Frontend State
+### Frontend (React)
 - **TanStack Query** manages all server state with automatic cache invalidation after mutations
 - Auth state stored in `localStorage` (persists across refreshes)
 - **Optimistic updates** on task status changes — UI updates immediately, rolls back on API error
@@ -184,7 +184,7 @@ Full interactive docs are available at **http://localhost:8000/docs** when the s
 - **No Token rotation or refresh token**: It was not mentioned in the scope, so ommited to simplify the implementation.
 - **Partial validation in fetching event and tasks**: Since authorization checks were not in scope, I have not implemented them, excluding what was explicitly mentioned
 - **Tests**: Did manual tests but no automated tests were written. 
-
+- **localstorage for stoing jwt**: We should use http only cookies for security , but chose localstoage for simplicity
 
 
 
