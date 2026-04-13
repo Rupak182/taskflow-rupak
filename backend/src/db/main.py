@@ -7,15 +7,11 @@ from sqlalchemy.orm import sessionmaker
 engine = AsyncEngine(
     create_engine(
         Config.DATABASE_URL,
-        echo=True,
+        echo=False,  # Set to False to stop flooding the console with raw SQL logs
         pool_pre_ping=True,
         pool_recycle=3600
     )
 )
-
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
 
 async def get_session():
     Session = sessionmaker(

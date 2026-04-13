@@ -4,7 +4,6 @@ from src.tasks.routes import task_router, task_router_projects
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from src.db.main import init_db
 
 # Import models to ensure they are registered with SQLAlchemy
 import src.projects.models
@@ -13,7 +12,6 @@ import src.auth.models
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Server is starting")
-    await init_db()
     yield
     print("Server is stopping")
 

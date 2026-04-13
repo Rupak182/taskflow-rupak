@@ -1,5 +1,7 @@
 import uvicorn
 import logging
+import os
+from src.config import Config
 
 def main():
     # Setup structured JSON format logging
@@ -11,11 +13,13 @@ def main():
     logger = logging.getLogger("taskflow")
     logger.info("Initializing TaskFlow Backend App Entrypoint...")
     
+    is_prod = Config.ENVIRONMENT == "production"
+    
     uvicorn.run(
         "src.__init__:app", 
-        host="127.0.0.1", 
+        host="0.0.0.0" if is_prod else "127.0.0.1", 
         port=8000, 
-        reload=True,
+        reload=not is_prod,
         log_level="info"
     )
 
