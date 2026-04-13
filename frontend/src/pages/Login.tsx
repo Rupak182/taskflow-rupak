@@ -2,21 +2,19 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLogin } from '@/api/auth/hooks';
+import { getApiErrorMsg } from '@/lib/utils';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   
   const loginMutation = useLogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!email || !password) {
-      setError('Please fill in all fields');
       toast.error('Please fill in all fields');
       return;
     }
@@ -27,8 +25,11 @@ export default function Login() {
       navigate('/projects');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to login';
-      setError(errorMsg);
+      let errorMsg = getApiErrorMsg(err, 'Failed to login');
+
+      if (errorMsg === 'unauthorized') {
+        errorMsg = 'Invalid email or password';
+      }
       toast.error(errorMsg);
     }
   };
@@ -37,7 +38,6 @@ export default function Login() {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-background">
       <div className="p-8 bg-card rounded shadow-md w-96 text-card-foreground border border-border">
         <h2 className="text-2xl font-bold mb-6">Login</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"

@@ -2,22 +2,20 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useRegister } from '@/api/auth/hooks';
+import { getApiErrorMsg } from '@/lib/utils';
 
 export default function Register() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const registerMutation = useRegister();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!name || !email || !password) {
-      setError('Please fill in all fields');
       toast.error('Please fill in all fields');
       return;
     }
@@ -28,8 +26,12 @@ export default function Register() {
       navigate('/projects');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to register';
-      setError(errorMsg);
+      let errorMsg = getApiErrorMsg(err, 'Failed to register');
+
+      const fields = err.response?.data?.fields;
+      if (errorMsg === 'validation failed' && fields?.email) {
+        errorMsg = 'An account with this email already exists';
+      }
       toast.error(errorMsg);
     }
   };
@@ -38,7 +40,6 @@ export default function Register() {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-background">
       <div className="p-8 bg-card rounded shadow-md w-96 border border-border text-card-foreground">
         <h2 className="text-2xl font-bold mb-6">Register</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
