@@ -4,6 +4,11 @@ A full-stack task management system. Users can register, log in, create projects
 
 ---
 
+<img width="1918" height="1073" alt="image" src="https://github.com/user-attachments/assets/ec8bcd9c-4713-48bc-b30b-d1c07dbdc280" />
+
+--
+
+
 ## 1. Overview
 
 ### What it does
@@ -65,7 +70,7 @@ I chose **FastAPI + Python**  for the backend along with sqlalchemy as ORM and a
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/Rupak182/proj.git
+git clone https://github.com/Rupak182/taskflow-rupak.git
 cd proj
 
 # 2. Set up environment variables
