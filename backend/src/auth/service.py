@@ -18,3 +18,8 @@ class UserService:
         await session.commit()
         await session.refresh(new_user)
         return new_user
+
+    async def get_all_users(self, session: AsyncSession) -> list[User]:
+        stmt = select(User)
+        result = await session.exec(stmt)
+        return list(result.all())

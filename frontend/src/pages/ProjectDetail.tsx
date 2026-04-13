@@ -3,7 +3,9 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectDetails } from '@/api/projects/hooks';
-import { useTasks, useCreateTask, useDeleteTask } from '@/api/tasks/hooks';
+import { useTasks, useCreateTask, useDeleteTask, useUpdateTask } from '@/api/tasks/hooks';
+import { useUsers } from '@/api/users/hooks';
+import type { TaskRead } from '@/api/tasks/types';
 import { getApiErrorMsg } from '@/lib/utils';
 
 const STATUS_OPTIONS = ['todo', 'in_progress', 'done'];
@@ -34,43 +36,81 @@ export default function ProjectDetail() {
 
   const { data: project, error: projectError } = useProjectDetails(projectId);
   const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useTasks(projectId);
+  const { data: usersData } = useUsers();
   const createTask = useCreateTask(projectId);
+  const updateTask = useUpdateTask(projectId);
   const deleteTask = useDeleteTask();
 
   const [isTaskModalOpen, setTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskRead | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [status, setStatus] = useState('todo');
-  const [priority, setPriority] = useState('medium');
-  const [dueDate, setDueDate] = useState('');
+
+  const [formData, setFormData] = useState({
+    title: '',
+    status: 'todo',
+    priority: 'medium',
+    due_date: '',
+    assignee_id: '',
+  });
+
+  const updateFormData = (updates: Partial<typeof formData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const openModal = (task?: TaskRead) => {
+    if (task) {
+      setEditingTask(task);
+      setFormData({
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        due_date: task.due_date || '',
+        assignee_id: task.assignee_id || '',
+      });
+    } else {
+      setEditingTask(null);
+      setFormData({
+        title: '',
+        status: 'todo',
+        priority: 'medium',
+        due_date: '',
+        assignee_id: '',
+      });
+    }
+    setTaskModalOpen(true);
+  };
 
   useEffect(() => {
     if (projectError) toast.error(getApiErrorMsg(projectError, 'Failed to load project'));
     if (tasksError) toast.error(getApiErrorMsg(tasksError, 'Failed to load tasks'));
   }, [projectError, tasksError]);
 
-  const resetModal = () => {
-    setTitle(''); setStatus('todo'); setPriority('medium'); setDueDate('');
-    setTaskModalOpen(false);
-  };
-
-  const handleCreateTask = async () => {
-    if (!title.trim()) {
+ 
+  const handleSaveTask = async () => {
+    if (!formData.title.trim()) {
       toast.error('Task title is required');
       return;
     }
     try {
-      await createTask.mutateAsync({
-        title,
-        status,
-        priority,
-        due_date: dueDate || undefined,
-      });
-      toast.success('Task created!');
-      resetModal();
+      const payload = {
+        title: formData.title,
+        status: formData.status,
+        priority: formData.priority,
+        due_date: formData.due_date || null,
+        assignee_id: formData.assignee_id || null,
+      };
+
+      if (editingTask) {
+        await updateTask.mutateAsync({ id: editingTask.id, data: payload });
+        toast.success('Task updated!');
+      } else {
+        await createTask.mutateAsync(payload);
+        toast.success('Task created!');
+      }
+      setTaskModalOpen(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      toast.error(getApiErrorMsg(err, 'Failed to create task'));
+      toast.error(getApiErrorMsg(err, editingTask ? 'Failed to update task' : 'Failed to create task'));
     }
   };
 
@@ -85,7 +125,13 @@ export default function ProjectDetail() {
     }
   };
 
+  const users = usersData || [];
   const tasks = tasksData?.tasks ?? [];
+
+  const getAssigneeName = (id?: string | null) => {
+    if (!id) return 'Unassigned';
+    return users.find((u) => u.id === id)?.name || 'Unknown User';
+  };
 
   return (
     <div className="p-8 max-w-6xl mx-auto text-foreground">
@@ -105,7 +151,7 @@ export default function ProjectDetail() {
           )}
         </div>
         <button
-          onClick={() => setTaskModalOpen(true)}
+          onClick={() => openModal()}
           className="px-4 py-2 bg-primary text-primary-foreground rounded"
         >
           + Create Task
@@ -123,12 +169,18 @@ export default function ProjectDetail() {
               <div>
                 <h3 className="font-bold">{task.title}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {task.due_date ? `Due: ${task.due_date}` : 'No due date'}
+                  {getAssigneeName(task.assignee_id)} • {task.due_date ? `Due: ${task.due_date}` : 'No due date'}
                 </p>
               </div>
               <div className="flex gap-2 items-center">
                 <span className="px-2 py-1 bg-background text-sm rounded capitalize">{task.priority}</span>
                 <span className="px-2 py-1 bg-background text-sm rounded capitalize">{task.status.replace('_', ' ')}</span>
+                <button
+                  onClick={() => openModal(task)}
+                  className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded transition hover:bg-secondary/80"
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() => setTaskToDelete(task.id)}
                   className="px-2 py-1 text-sm text-destructive border border-destructive rounded hover:bg-destructive/10 transition"
@@ -144,18 +196,18 @@ export default function ProjectDetail() {
       {isTaskModalOpen && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card p-6 rounded shadow-xl w-full max-w-md border border-border text-card-foreground">
-            <h2 className="text-2xl font-bold mb-4">Create Task</h2>
+            <h2 className="text-2xl font-bold mb-4">{editingTask ? 'Edit Task' : 'Create Task'}</h2>
             <div className="flex flex-col gap-4">
               <input
                 type="text"
                 placeholder="Task Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={formData.title}
+                onChange={(e) => updateFormData({ title: e.target.value })}
                 className="p-2 border border-border rounded bg-background text-foreground"
               />
               <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                value={formData.status}
+                onChange={(e) => updateFormData({ status: e.target.value })}
                 className="p-2 border border-border rounded bg-background text-foreground"
               >
                 {STATUS_OPTIONS.map((s) => (
@@ -163,33 +215,43 @@ export default function ProjectDetail() {
                 ))}
               </select>
               <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
+                value={formData.priority}
+                onChange={(e) => updateFormData({ priority: e.target.value })}
                 className="p-2 border border-border rounded bg-background text-foreground"
               >
                 {PRIORITY_OPTIONS.map((p) => (
                   <option key={p} value={p}>{p.toUpperCase()}</option>
                 ))}
               </select>
+              <select
+                value={formData.assignee_id}
+                onChange={(e) => updateFormData({ assignee_id: e.target.value })}
+                className="p-2 border border-border rounded bg-background text-foreground"
+              >
+                <option value="">Unassigned</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                ))}
+              </select>
               <input
                 type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                value={formData.due_date}
+                onChange={(e) => updateFormData({ due_date: e.target.value })}
                 className="p-2 border border-border rounded bg-background text-foreground"
               />
               <div className="flex justify-end gap-4 mt-2">
                 <button
-                  onClick={resetModal}
+                  onClick={() => setTaskModalOpen(false)}
                   className="px-4 py-2 bg-background border border-border text-foreground rounded"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleCreateTask}
-                  disabled={createTask.isPending}
+                  onClick={handleSaveTask}
+                  disabled={createTask.isPending || updateTask.isPending}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50"
                 >
-                  {createTask.isPending ? 'Creating...' : 'Save Task'}
+                  {createTask.isPending || updateTask.isPending ? 'Saving...' : 'Save Task'}
                 </button>
               </div>
             </div>

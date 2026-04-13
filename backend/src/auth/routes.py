@@ -5,6 +5,7 @@ from src.db.main import get_session
 from .schemas import UserCreateModel, AuthResponseModel, UserLoginModel, UserModelResponse
 from .service import UserService
 from .utils import create_access_token, verify_password
+from .dependencies import access_token_bearer
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -60,3 +61,11 @@ async def login(login_data: UserLoginModel, session: AsyncSession = Depends(get_
         token=token,
         user=UserModelResponse(id=user.id, name=user.name, email=user.email)
     )
+
+@auth_router.get("/users", response_model=list[UserModelResponse])
+async def get_users(
+    session: AsyncSession = Depends(get_session), 
+    token_details=Depends(access_token_bearer)
+):
+    users = await user_service.get_all_users(session)
+    return [UserModelResponse(id=user.id, name=user.name, email=user.email) for user in users]

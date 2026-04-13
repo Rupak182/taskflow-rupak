@@ -2,6 +2,7 @@ export const queryKeys = {
   auth: {
     base: ['auth'] as const,
     user: () => [...queryKeys.auth.base, 'user'] as const,
+    users: () => [...queryKeys.auth.base, 'users'] as const,
   },
   projects: {
     base: ['projects'] as const,

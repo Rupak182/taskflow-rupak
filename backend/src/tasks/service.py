@@ -1,6 +1,7 @@
 import uuid
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
+from sqlalchemy import nulls_last
 from .models import Task
 from .schemas import TaskCreate, TaskUpdate
 
@@ -24,6 +25,8 @@ class TaskService:
             stmt = stmt.where(Task.status == status)
         if assignee_id:
             stmt = stmt.where(Task.assignee_id == assignee_id)
+            
+        stmt = stmt.order_by(nulls_last(Task.due_date.asc()))
             
         result = await session.exec(stmt)
         return result.all()
