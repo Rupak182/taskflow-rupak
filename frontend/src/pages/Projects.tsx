@@ -44,7 +44,7 @@ export default function Projects() {
         <ProjectsSkeleton />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {projects?.map((project: any) => (
+          {projects?.map((project: { id: string; name: string; description: string }) => (
             <Link 
               key={project.id} 
               to={`/projects/${project.id}`}
