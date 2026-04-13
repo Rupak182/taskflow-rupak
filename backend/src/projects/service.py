@@ -53,3 +53,30 @@ class ProjectService:
         # Database cascading foreign keys and ORM efficiently wipe out tasks automatically
         await session.delete(project)
         await session.commit()
+
+    async def get_project_stats(self, project_id: uuid.UUID, session: AsyncSession):
+        # Counts by status
+        status_stmt = (
+            select(Task.status, func.count(Task.id))
+            .where(Task.project_id == project_id)
+            .group_by(Task.status)
+        )
+        status_results = await session.exec(status_stmt)
+        status_counts = {str(status.value): count for status, count in status_results.all()}
+
+        # Counts by assignee
+        assignee_stmt = (
+            select(Task.assignee_id, func.count(Task.id))
+            .where(Task.project_id == project_id)
+            .group_by(Task.assignee_id)
+        )
+        assignee_results = await session.exec(assignee_stmt)
+        assignee_counts = {
+            str(assignee_id) if assignee_id else "unassigned": count 
+            for assignee_id, count in assignee_results.all()
+        }
+
+        return {
+            "status_counts": status_counts,
+            "assignee_counts": assignee_counts
+        }

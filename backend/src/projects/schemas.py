@@ -18,3 +18,7 @@ class ProjectRead(BaseModel):
     description: str | None
     owner_id: uuid.UUID
     created_at: datetime
+
+class ProjectStatsResponse(BaseModel):
+    status_counts: dict[str, int]
+    assignee_counts: dict[str, int]

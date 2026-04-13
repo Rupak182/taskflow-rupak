@@ -51,12 +51,12 @@ export default function Projects() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Projects</h1>
+    <div className="p-4 sm:p-8 max-w-4xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Projects</h1>
         <button
           onClick={() => setModalOpen(true)}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded"
+          className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded whitespace-nowrap"
         >
           + New Project
         </button>

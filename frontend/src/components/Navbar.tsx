@@ -27,9 +27,9 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <ThemeToggle />
         {isAuthenticated ? (
-          <div className="flex items-center gap-4">
-            <span>Welcome, {user.name}</span>
-            <Button onClick={handleLogout}>Logout</Button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="hidden sm:inline text-sm">Welcome, {user.name}</span>
+            <Button onClick={handleLogout} variant="outline" size="sm">Logout</Button>
           </div>
         ) : (
           <div className="flex gap-4">

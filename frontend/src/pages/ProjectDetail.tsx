@@ -35,7 +35,13 @@ export default function ProjectDetail() {
   const projectId = id ?? '';
 
   const { data: project, error: projectError } = useProjectDetails(projectId);
-  const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useTasks(projectId);
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterAssignee, setFilterAssignee] = useState<string>('');
+
+  const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useTasks(projectId, {
+    ...(filterStatus ? { status: filterStatus } : {}),
+    ...(filterAssignee ? { assignee_id: filterAssignee } : {}),
+  });
   const { data: usersData } = useUsers();
   const createTask = useCreateTask(projectId);
   const updateTask = useUpdateTask(projectId);
@@ -134,11 +140,11 @@ export default function ProjectDetail() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto text-foreground">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto text-foreground">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           {project ? (
-            <h1 className="text-3xl font-bold">{project.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{project.name}</h1>
           ) : (
             <Skeleton className="h-9 w-48 rounded" />
           )}
@@ -152,10 +158,33 @@ export default function ProjectDetail() {
         </div>
         <button
           onClick={() => openModal()}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded"
+          className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded whitespace-nowrap"
         >
           + Create Task
         </button>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="w-full sm:w-auto p-2 border border-border rounded bg-background text-foreground"
+        >
+          <option value="">All Status</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>{s.replace('_', ' ').toUpperCase()}</option>
+          ))}
+        </select>
+        <select
+          value={filterAssignee}
+          onChange={(e) => setFilterAssignee(e.target.value)}
+          className="w-full sm:w-auto p-2 border border-border rounded bg-background text-foreground"
+        >
+          <option value="">All Assignees</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+          ))}
+        </select>
       </div>
 
       {tasksLoading ? (
@@ -165,16 +194,16 @@ export default function ProjectDetail() {
       ) : (
         <div className="flex flex-col gap-4">
           {tasks.map((task) => (
-            <div key={task.id} className="p-4 bg-card border border-border text-card-foreground rounded flex justify-between items-center">
-              <div>
-                <h3 className="font-bold">{task.title}</h3>
-                <p className="text-sm text-muted-foreground">
+            <div key={task.id} className="p-4 bg-card border border-border text-card-foreground rounded flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div className="min-w-0">
+                <h3 className="font-bold truncate">{task.title}</h3>
+                <p className="text-sm text-muted-foreground truncate">
                   {getAssigneeName(task.assignee_id)} • {task.due_date ? `Due: ${task.due_date}` : 'No due date'}
                 </p>
               </div>
-              <div className="flex gap-2 items-center">
-                <span className="px-2 py-1 bg-background text-sm rounded capitalize">{task.priority}</span>
-                <span className="px-2 py-1 bg-background text-sm rounded capitalize">{task.status.replace('_', ' ')}</span>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="px-2 py-1 bg-background text-xs sm:text-sm rounded capitalize">{task.priority}</span>
+                <span className="px-2 py-1 bg-background text-xs sm:text-sm rounded capitalize">{task.status.replace('_', ' ')}</span>
                 <button
                   onClick={() => openModal(task)}
                   className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded transition hover:bg-secondary/80"

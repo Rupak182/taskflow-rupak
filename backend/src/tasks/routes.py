@@ -18,7 +18,7 @@ project_service = ProjectService()
 async def list_tasks(
     project_id: uuid.UUID,
     status: str | None = None,
-    assignee: uuid.UUID | None = None,
+    assignee_id: uuid.UUID | None = None,
     session: AsyncSession = Depends(get_session),
     token_details: dict = Depends(access_token_bearer)
 ):
@@ -26,7 +26,7 @@ async def list_tasks(
     if not project:
         return JSONResponse(status_code=404, content={"error": "not found"})
     
-    tasks = await task_service.list_tasks(project_id, status, assignee, session)
+    tasks = await task_service.list_tasks(project_id, status, assignee_id, session)
     return {"tasks": [TaskRead.model_validate(t).model_dump(mode="json") for t in tasks]}
 
 @task_router_projects.post("/{project_id}/tasks", response_model=TaskRead, status_code=status.HTTP_201_CREATED)

@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.main import get_session
 import uuid
-from .schemas import ProjectCreate, ProjectUpdate, ProjectRead
+from .schemas import ProjectCreate, ProjectUpdate, ProjectRead, ProjectStatsResponse
 from .service import ProjectService
 from src.auth.dependencies import access_token_bearer
 
@@ -57,6 +57,19 @@ async def get_project(
         for t in project.tasks
     ]
     return response_data
+
+@project_router.get("/{project_id}/stats", response_model=ProjectStatsResponse)
+async def get_project_stats(
+    project_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    token_details: dict = Depends(access_token_bearer)
+):
+    project = await project_service.get_project(project_id, session)
+    if not project:
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    
+    stats = await project_service.get_project_stats(project_id, session)
+    return stats
 
 @project_router.patch("/{project_id}", response_model=ProjectRead)
 async def update_project(
