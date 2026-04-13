@@ -1,6 +1,6 @@
 # TaskFlow
 
-A full-stack task management system built as an engineering take-home assignment. Users can register, log in, create projects, and manage tasks — including assigning them to other users, filtering by status/assignee, and tracking priorities.
+A full-stack task management system. Users can register, log in, create projects, and manage tasks — including assigning them to other users, filtering by status/assignee, and tracking priorities.
 
 ---
 
@@ -93,6 +93,8 @@ docker compose exec app uv run alembic upgrade head
 
 # Seed the database with test data (1 user, 1 project, 3 tasks)
 docker compose exec app uv run python seed.py
+# Seed Login Credentials:
+# Email: test@example.com , Password: password
 ```
 
 ## Interactive API Documentation
